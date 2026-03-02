@@ -17,169 +17,310 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Улучшенные CSS стили
+# Светлая тема в стиле университета Асфендиярова
 def load_css():
     st.markdown("""
     <style>
-    /* Основные стили */
+    /* Основные стили - светлая тема */
     .main-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #4A90E2 0%, #7B68EE 100%);
         color: white;
-        padding: 30px;
-        border-radius: 15px;
+        padding: 40px;
+        border-radius: 20px;
         text-align: center;
-        margin-bottom: 30px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        margin-bottom: 40px;
+        box-shadow: 0 15px 35px rgba(74, 144, 226, 0.2);
+        position: relative;
+        overflow: hidden;
     }
     
-    /* Карточки метрик */
+    .main-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+        transform: rotate(45deg);
+        animation: shine 3s infinite;
+    }
+    
+    @keyframes shine {
+        0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+        100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+    }
+    
+    /* Карточки метрик - светлые */
     .metric-card {
-        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-        padding: 25px;
-        border-radius: 15px;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(74, 144, 226, 0.1);
         text-align: center;
-        border-left: 5px solid #667eea;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        margin: 10px 0;
+        border-left: 6px solid #4A90E2;
+        transition: all 0.3s ease;
+        margin: 15px 0;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .metric-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #4A90E2, #7B68EE, #4A90E2);
+        background-size: 200% 100%;
+        animation: gradient 3s ease infinite;
+    }
+    
+    @keyframes gradient {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
     }
     
     .metric-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(74, 144, 226, 0.15);
+        border-left-color: #7B68EE;
     }
     
-    /* Карточки результатов */
+    /* Карточки результатов - светлые */
     .prediction-box {
-        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-        padding: 30px;
-        border-radius: 15px;
-        border: 2px solid #2196f3;
-        margin: 25px 0;
-        box-shadow: 0 10px 30px rgba(33, 150, 243, 0.2);
+        background: linear-gradient(135deg, #e8f4fd 0%, #f0f8ff 100%);
+        padding: 35px;
+        border-radius: 20px;
+        border: 2px solid #4A90E2;
+        margin: 30px 0;
+        box-shadow: 0 15px 35px rgba(74, 144, 226, 0.15);
+        position: relative;
     }
     
-    /* Карточки успеха */
+    /* Карточки успеха - светлые */
     .success-box {
-        background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
-        padding: 25px;
-        border-radius: 15px;
-        border: 2px solid #4caf50;
-        margin: 20px 0;
-        box-shadow: 0 10px 30px rgba(76, 175, 80, 0.2);
+        background: linear-gradient(135deg, #e8f5e8 0%, #f0fff0 100%);
+        padding: 30px;
+        border-radius: 20px;
+        border: 2px solid #4CAF50;
+        margin: 25px 0;
+        box-shadow: 0 15px 35px rgba(76, 175, 80, 0.15);
     }
     
-    /* Карточки информации */
+    /* Карточки информации - светлые */
     .info-box {
-        background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
-        padding: 25px;
-        border-radius: 15px;
-        border: 2px solid #ff9800;
-        margin: 20px 0;
-        box-shadow: 0 10px 30px rgba(255, 152, 0, 0.2);
+        background: linear-gradient(135deg, #fff8e1 0%, #fffbf0 100%);
+        padding: 30px;
+        border-radius: 20px;
+        border: 2px solid #FF9800;
+        margin: 25px 0;
+        box-shadow: 0 15px 35px rgba(255, 152, 0, 0.15);
     }
     
-    /* Стили кнопок */
+    /* Стили кнопок - светлые */
     .stButton > button {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #4A90E2 0%, #7B68EE 100%);
         color: white;
         border: none;
-        padding: 12px 25px;
-        border-radius: 10px;
+        padding: 15px 30px;
+        border-radius: 15px;
         font-weight: bold;
         font-size: 16px;
         transition: all 0.3s ease;
-        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        box-shadow: 0 8px 20px rgba(74, 144, 226, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stButton > button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
+    }
+    
+    .stButton > button:hover::before {
+        left: 100%;
     }
     
     .stButton > button:hover {
-        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        background: linear-gradient(135deg, #7B68EE 0%, #4A90E2 100%);
+        transform: translateY(-3px);
+        box-shadow: 0 12px 30px rgba(74, 144, 226, 0.4);
     }
     
-    /* Стили загрузки файлов */
+    /* Стили загрузки файлов - светлые */
     .upload-area {
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-        padding: 40px;
-        border: 3px dashed #667eea;
-        border-radius: 15px;
+        background: linear-gradient(135deg, #f8f9ff 0%, #e8f4fd 100%);
+        padding: 50px;
+        border: 3px dashed #4A90E2;
+        border-radius: 20px;
         text-align: center;
-        margin: 25px 0;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin: 30px 0;
+        box-shadow: 0 15px 35px rgba(74, 144, 226, 0.1);
         transition: all 0.3s ease;
+        position: relative;
+    }
+    
+    .upload-area::before {
+        content: '📸';
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 24px;
+        opacity: 0.5;
     }
     
     .upload-area:hover {
-        border-color: #764ba2;
-        background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        border-color: #7B68EE;
+        background: linear-gradient(135deg, #fff8e1 0%, #fffbf0 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 20px 40px rgba(74, 144, 226, 0.15);
     }
     
-    /* Заголовки */
+    /* Заголовки - светлые */
     .section-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #4A90E2 0%, #7B68EE 100%);
         color: white;
-        padding: 15px 25px;
-        border-radius: 10px;
-        margin: 20px 0;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        padding: 20px 30px;
+        border-radius: 15px;
+        margin: 25px 0;
+        box-shadow: 0 8px 20px rgba(74, 144, 226, 0.2);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .section-header::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+        animation: slide 3s infinite;
+    }
+    
+    @keyframes slide {
+        0% { left: -100%; }
+        100% { left: 100%; }
     }
     
     /* Анимация */
     @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(20px); }
+        from { opacity: 0; transform: translateY(30px); }
         to { opacity: 1; transform: translateY(0); }
     }
     
     .fade-in {
-        animation: fadeIn 0.5s ease-out;
+        animation: fadeIn 0.6s ease-out;
     }
     
-    /* Улучшенные метрики */
+    /* Улучшенные метрики - светлые */
     div[data-testid="metric-container"] {
-        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-        padding: 20px;
-        border-radius: 15px;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-        border-left: 5px solid #667eea;
-        transition: transform 0.3s ease;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+        padding: 25px;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(74, 144, 226, 0.1);
+        border-left: 6px solid #4A90E2;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    div[data-testid="metric-container"]::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #4A90E2, #7B68EE, #4A90E2);
+        background-size: 200% 100%;
+        animation: gradient 3s ease infinite;
     }
     
     div[data-testid="metric-container"]:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 12px 35px rgba(0,0,0,0.15);
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(74, 144, 226, 0.15);
+        border-left-color: #7B68EE;
     }
     
-    /* Стили для изображений */
+    /* Стили для изображений - светлые */
     .stImage > img {
-        border-radius: 15px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        transition: transform 0.3s ease;
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(74, 144, 226, 0.2);
+        transition: all 0.3s ease;
+        position: relative;
     }
     
     .stImage > img:hover {
-        transform: scale(1.02);
+        transform: scale(1.03);
+        box-shadow: 0 20px 45px rgba(74, 144, 226, 0.25);
     }
     
-    /* Стили для expander */
+    /* Стили для expander - светлые */
     .streamlit-expanderHeader {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #4A90E2 0%, #7B68EE 100%);
         color: white;
-        border-radius: 10px;
-        padding: 10px 20px;
+        border-radius: 15px;
+        padding: 15px 25px;
+        box-shadow: 0 5px 15px rgba(74, 144, 226, 0.2);
+        transition: all 0.3s ease;
+    }
+    
+    .streamlit-expanderHeader:hover {
+        background: linear-gradient(135deg, #7B68EE 0%, #4A90E2 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(74, 144, 226, 0.3);
+    }
+    
+    /* Фон страницы */
+    .stApp {
+        background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+    }
+    
+    /* Боковая панель */
+    .stSidebar {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+        border-right: 1px solid #e8f4fd;
+    }
+    
+    /* Логотип университета */
+    .university-logo {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: white;
+        padding: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
     }
     </style>
     """, unsafe_allow_html=True)
 
 def create_logo_section():
-    """Создает улучшенный логотип университета"""
+    """Создает логотип университета в светлой теме"""
+    # Создаем простой логотип университета с использованием эмодзи
     st.markdown("""
     <div class="main-header fade-in">
-        <h1 style="margin: 0; font-size: 3em; font-weight: bold;">🦠 Казахский Национальный Медицинский Университет</h1>
-        <p style="margin: 15px 0 0 0; font-size: 1.4em; opacity: 0.9;">имени С.Д. Асфендиярова</p>
-        <p style="margin: 10px 0 0 0; font-size: 1.2em; opacity: 0.8;">🧬 Универсальная Система Определения Бактерий</p>
-        <div style="margin-top: 20px; padding: 10px 20px; background: rgba(255,255,255,0.2); border-radius: 25px; display: inline-block;">
-            <span style="font-weight: bold;">🎯 20 Эталонов • 🔍 Сравнение • 🌐 Универсальный Доступ</span>
+        <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+            <div class="university-logo" style="display: flex; align-items: center; justify-content: center; font-size: 40px;">
+                🏥
+            </div>
+        </div>
+        <h1 style="margin: 0; font-size: 3.2em; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);">Казахский Национальный Медицинский Университет</h1>
+        <p style="margin: 15px 0 0 0; font-size: 1.5em; opacity: 0.95; font-weight: 500;">имени С.Д. Асфендиярова</p>
+        <p style="margin: 12px 0 0 0; font-size: 1.3em; opacity: 0.9;">🧬 Универсальная Система Определения Бактерий</p>
+        <div style="margin-top: 25px; padding: 12px 25px; background: rgba(255,255,255,0.25); border-radius: 30px; display: inline-block; backdrop-filter: blur(10px);">
+            <span style="font-weight: bold; font-size: 1.1em;">🎯 20 Эталонов • 🔍 Сравнение • 🌐 Универсальный Доступ</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -355,8 +496,6 @@ def classify_with_reference(image_array, reference_samples):
 def display_reference_samples_only(reference_samples, matched_sample=None):
     """Отображает эталонные образцы только при загрузке (без заголовка)"""
     if matched_sample:
-        # НЕ показываем заголовок "Найдено совпадение"
-        
         # Показываем только совпавший образец
         image_path = f"exclusive_database/images/{matched_sample['filename']}"
         if os.path.exists(image_path):
@@ -389,7 +528,7 @@ def display_classification_results(result, reference_samples):
     if "error" in result:
         st.markdown(f"""
         <div class="info-box fade-in">
-            <h3 style="color: #ff9800; margin: 0 0 15px 0;">⚠️ {result['error']}</h3>
+            <h3 style="color: #FF9800; margin: 0 0 15px 0;">⚠️ {result['error']}</h3>
             <p style="color: #666; margin: 0;">Наилучшее совпадение: {result['best_score']:.2f}</p>
         </div>
         """, unsafe_allow_html=True)
@@ -414,7 +553,7 @@ def display_classification_results(result, reference_samples):
     else:
         st.markdown(f"""
         <div class="success-box fade-in">
-            <h3 style="color: #4caf50; margin: 0 0 15px 0;">✅ Классификация выполнена</h3>
+            <h3 style="color: #4CAF50; margin: 0 0 15px 0;">✅ Классификация выполнена</h3>
             <p style="color: #666; margin: 0;">Схожесть с эталоном: {result['similarity_score']:.2f}</p>
         </div>
         """, unsafe_allow_html=True)
@@ -437,32 +576,32 @@ def display_classification_results(result, reference_samples):
         with col1:
             st.markdown(f"""
             <div class="metric-card fade-in">
-                <h3 style="color: #667eea; margin: 0 0 10px 0;">🏛️ Семейство</h3>
-                <h2 style="color: #4caf50; margin: 0; font-size: 2em;">{result['confidence']:.0f}%</h2>
-                <p style="color: #666; margin: 5px 0 0 0;">уверенность</p>
+                <h3 style="color: #4A90E2; margin: 0 0 15px 0;">🏛️ Семейство</h3>
+                <h2 style="color: #4CAF50; margin: 0; font-size: 2.2em;">{result['confidence']:.0f}%</h2>
+                <p style="color: #666; margin: 8px 0 0 0;">уверенность</p>
             </div>
             """, unsafe_allow_html=True)
         
         with col2:
             st.markdown(f"""
             <div class="metric-card fade-in" style="animation-delay: 0.1s;">
-                <h3 style="color: #667eea; margin: 0 0 10px 0;">🎯 Схожесть</h3>
-                <h2 style="color: #2196f3; margin: 0; font-size: 2em;">{result['similarity_score']:.2f}</h2>
-                <p style="color: #666; margin: 5px 0 0 0;">балл</p>
+                <h3 style="color: #4A90E2; margin: 0 0 15px 0;">🎯 Схожесть</h3>
+                <h2 style="color: #2196F3; margin: 0; font-size: 2.2em;">{result['similarity_score']:.2f}</h2>
+                <p style="color: #666; margin: 8px 0 0 0;">балл</p>
             </div>
             """, unsafe_allow_html=True)
         
         with col3:
             st.markdown(f"""
             <div class="metric-card fade-in" style="animation-delay: 0.2s;">
-                <h3 style="color: #667eea; margin: 0 0 10px 0;">🦠 Палочки</h3>
-                <h2 style="color: #ff9800; margin: 0; font-size: 2em;">{result['bacilli_count']}</h2>
-                <p style="color: #666; margin: 5px 0 0 0;">штук</p>
+                <h3 style="color: #4A90E2; margin: 0 0 15px 0;">🦠 Палочки</h3>
+                <h2 style="color: #FF9800; margin: 0; font-size: 2.2em;">{result['bacilli_count']}</h2>
+                <p style="color: #666; margin: 8px 0 0 0;">штук</p>
             </div>
             """, unsafe_allow_html=True)
 
 def main():
-    """Главная функция универсального классификатора без OpenCV"""
+    """Главная функция универсального классификатора в светлой теме"""
     # Загружаем CSS
     load_css()
     
@@ -471,16 +610,14 @@ def main():
     
     # Заголовок
     st.markdown("""
-    <div style="text-align: center; padding: 25px; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); border-radius: 15px; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
-        <h2 style="color: #667eea; margin: 0; font-size: 2em;">🔍 Универсальный Классификатор Бактерий</h2>
-        <p style="color: #666; margin: 10px 0 0 0; font-size: 1.1em;">Сравнение с 20 эталонами • Автоматическое определение • Точная таксономия</p>
+    <div style="text-align: center; padding: 30px; background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%); border-radius: 20px; margin-bottom: 40px; box-shadow: 0 15px 35px rgba(74, 144, 226, 0.1);">
+        <h2 style="color: #4A90E2; margin: 0; font-size: 2.2em; font-weight: bold;">🔍 Универсальный Классификатор Бактерий</h2>
+        <p style="color: #666; margin: 12px 0 0 0; font-size: 1.2em;">Сравнение с 20 эталонами • Автоматическое определение • Точная таксономия</p>
     </div>
     """, unsafe_allow_html=True)
     
     # Загружаем эталонные образцы
     reference_samples = load_reference_samples()
-    
-    # НЕ показываем эталоны на главном экране
     
     # Загрузка изображения
     st.markdown("---")
