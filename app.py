@@ -329,7 +329,6 @@ def classify_with_reference(image_array, reference_samples):
                 best_match = sample
     
     if best_match and best_score > 0.2:  # Порог схожести
-        tax = best_match["taxonomy"]
         confidence = min(best_score * 100, 95)
         
         return {
