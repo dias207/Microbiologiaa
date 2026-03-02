@@ -1,14 +1,14 @@
 import streamlit as st
+import cv2
 import numpy as np
 from PIL import Image
 import io
 import base64
 from typing import Dict, List, Tuple
+import matplotlib.pyplot as plt
 import os
-import hashlib
-import json
 
-# Импортируем эксклюзивный тренер без OpenCV
+# Импортируем эксклюзивный тренер
 try:
     from exclusive_trainer import classify_exclusive_bacteria, get_exclusive_status
     EXCLUSIVE_MODE = True
@@ -25,11 +25,11 @@ except ImportError:
     
     def get_exclusive_status():
         return {
-            "total": 19,
+            "total": 0,
             "max": 20,
-            "percentage": 95,
-            "remaining": 1,
-            "ready": True
+            "percentage": 0,
+            "remaining": 20,
+            "ready": False
         }
 
 # Настройка страницы
@@ -123,11 +123,7 @@ def display_image_with_bacilli(image, bacilli_count):
         """, unsafe_allow_html=True)
     
     with col2:
-        if hasattr(image, 'shape') and len(image.shape) >= 2:
-            density = bacilli_count / (image.shape[0] * image.shape[1] / 10000)
-        else:
-            density = bacilli_count / 100
-            
+        density = bacilli_count / (image.shape[0] * image.shape[1] / 10000) if image is not None else 0
         st.markdown(f"""
         <div class="metric-card">
             <h3>📊 Плотность</h3>
@@ -266,13 +262,6 @@ def show_training_instructions():
         - 🔒 Эксклюзивность гарантируется
         """)
 
-def simple_bacilli_count(image_array):
-    """Простой подсчет палочек без OpenCV"""
-    # Это упрощенная версия - в реальности используется OpenCV
-    # Для демонстрации возвращаем случайное количество
-    import random
-    return random.randint(10, 200)
-
 def main():
     """Главная функция приложения"""
     # Загружаем CSS
@@ -336,6 +325,12 @@ def main():
             image = Image.open(io.BytesIO(image_bytes))
             image_array = np.array(image)
             
+            # Конвертация в BGR для OpenCV
+            if len(image_array.shape) == 3:
+                image_array = cv2.cvtColor(image_array, cv2.COLOR_RGB2BGR)
+            else:
+                image_array = image_array
+            
             # Отображаем загруженное изображение
             st.markdown("---")
             st.subheader("📸 Загруженное изображение")
@@ -343,22 +338,7 @@ def main():
             
             # Анализ изображения
             with st.spinner("🔍 Анализ изображения..."):
-                # Пробуем использовать эксклюзивный классификатор
-                try:
-                    result = classify_exclusive_bacteria(image_array)
-                except Exception as e:
-                    # Если не работает, используем заглушку
-                    result = {
-                        "Тұқымдастық": "❌ Система недоступна",
-                        "Туыстастыґт": "❌ Система недоступна", 
-                        "Түрі": "❌ Система недоступна",
-                        "error": f"Ошибка классификации: {str(e)}"
-                    }
-            
-            # Добавляем подсчет палочек
-            if show_bacilli and "error" not in result:
-                bacilli_count = simple_bacilli_count(image_array)
-                result['bacilli_count'] = bacilli_count
+                result = classify_exclusive_bacteria(image_array)
             
             # Отображаем результаты
             st.markdown("---")
@@ -398,17 +378,16 @@ def main():
                 with col1:
                     st.markdown("### 🏛️ Таксономия")
                     st.success(f"**Семейство:** {result['Тұқымдастық']}")
-                    st.success(f"**Род:** {result['Туыстастыґт']}")
+                    st.success(f"**Род:** {result['Туыстастық']}")
                     st.success(f"**Вид:** {result['Түрі']}")
                 
                 with col2:
                     st.markdown("### 📈 Статистика")
-                    st.info(f"**Match ID:** {result.get('match_id', 'N/A')}")
-                    st.info(f"**Уверенность:** {result.get('confidence', 0):.1f}%")
+                    st.info(f"**Match ID:** {result['match_id']}")
+                    st.info(f"**Уверенность:** {result['confidence']:.1f}%")
                     
                     # Проверяем порог уверенности
-                    confidence = result.get('confidence', 0)
-                    if confidence >= confidence_threshold:
+                    if result['confidence'] >= confidence_threshold:
                         st.success("✅ Уверенность выше порога")
                     else:
                         st.warning(f"⚠️ Уверенность ниже порога {confidence_threshold}%")
@@ -451,8 +430,8 @@ def main():
             **Технологии:**
             - 🔒 Эксклюзивная система на 20 фотографиях
             - 🎯 Точная классификация только на ваших данных
+            - OpenCV для детекции и анализа форм
             - Streamlit для веб-интерфейса
-            - PIL для обработки изображений
             
             **Функционал:**
             - Определение таксономии бактерий (семейство, род, вид)
