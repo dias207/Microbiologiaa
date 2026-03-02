@@ -1,0 +1,56 @@
+[
+  {
+    "id": 0,
+    "filename": "bacteria_20260302_023044.jpg",
+    "timestamp": "20260302_023044",
+    "taxonomy": {
+      "family": "Micrococcaceae",
+      "genus": "Staphylococcus",
+      "species": "S. aureus"
+    },
+    "bacilli_count": 1,
+    "features": {
+      "mean_intensity": 242.37309166666665,
+      "std_intensity": 37.38336320176304,
+      "height": 300,
+      "width": 400
+    },
+    "notes": "Золотистый стафилококк - гроздевидные кокки"
+  },
+  {
+    "id": 1,
+    "filename": "bacteria_20260302_023342.jpg",
+    "timestamp": "20260302_023342",
+    "taxonomy": {
+      "family": "Enterobacteriaceae",
+      "genus": "Escherichia",
+      "species": "E. coli"
+    },
+    "bacilli_count": 54,
+    "features": {
+      "mean_intensity": 235.03785833333333,
+      "std_intensity": 27.802395132073254,
+      "height": 300,
+      "width": 400
+    },
+    "notes": "Кишечная палочка - грамотрицательные палочки"
+  },
+  {
+    "id": 2,
+    "filename": "bacteria_20260302_023415.jpg",
+    "timestamp": "20260302_023415",
+    "taxonomy": {
+      "family": "Bacillaceae",
+      "genus": "Bacillus",
+      "species": "B. subtilis"
+    },
+    "bacilli_count": 75,
+    "features": {
+      "mean_intensity": 239.2504,
+      "std_intensity": 30.82136163723682,
+      "height": 300,
+      "width": 400
+    },
+    "notes": "Сенная палочка - спорообразующие, длинные палочки"
+  }
+]

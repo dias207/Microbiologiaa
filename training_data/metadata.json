@@ -1,0 +1,26 @@
+[
+  {
+    "id": 0,
+    "filename": "sample_20260302_021935.jpg",
+    "timestamp": "20260302_021935",
+    "taxonomy": {
+      "family": "Brucellaceae",
+      "genus": "Brucella",
+      "species": "Brucella melitensis"
+    },
+    "bacilli_count": 0,
+    "features": {
+      "mean_intensity": 134.37160610563285,
+      "std_intensity": 55.178022684673195,
+      "height": 374,
+      "width": 673,
+      "aspect_ratio": 1.7994652406417113,
+      "num_contours": 487,
+      "mean_circularity": 0.22141290129467742,
+      "mean_aspect_ratio": 3.032322883773267,
+      "circular_vs_elongated": 0.01642710472279261
+    },
+    "notes": "",
+    "verified": true
+  }
+]

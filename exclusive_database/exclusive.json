@@ -1,0 +1,439 @@
+[
+  {
+    "id": 0,
+    "filename": "exclusive_01.jpg",
+    "hash": "f69d84a4de726a35e3e8697f324048b6",
+    "timestamp": "20260302_024154",
+    "taxonomy": {
+      "family": "Micrococcaceae",
+      "genus": "Staphylococcus",
+      "species": "S. aureus"
+    },
+    "bacilli_count": 5,
+    "features": {
+      "mean_intensity": 232.60739166666667,
+      "std_intensity": 51.501813240214474,
+      "height": 300,
+      "width": 400,
+      "aspect_ratio": 1.3333333333333333,
+      "num_contours": 20,
+      "mean_circularity": 0.21521828293830092
+    },
+    "notes": "Эксклюзивный пример #1 - золотистый стафилококк",
+    "exclusive": true
+  },
+  {
+    "id": 1,
+    "filename": "exclusive_02.jpg",
+    "hash": "bd3e7d4fc4c957997fa65d63cb3e3f2e",
+    "timestamp": "20260302_024432",
+    "taxonomy": {
+      "family": "Neisseriaceae",
+      "genus": "Neisseria",
+      "species": "N. meningitidis"
+    },
+    "bacilli_count": 49,
+    "features": {
+      "mean_intensity": 237.214225,
+      "std_intensity": 44.58726162611965,
+      "height": 300,
+      "width": 400,
+      "aspect_ratio": 1.3333333333333333,
+      "num_contours": 153,
+      "mean_circularity": 0.1024678087570992
+    },
+    "notes": "Эксклюзивный пример #2 - менингококк (диплококки)",
+    "exclusive": true
+  },
+  {
+    "id": 2,
+    "filename": "exclusive_03.jpg",
+    "hash": "c0ed30d529774a48d49e574575e80696",
+    "timestamp": "20260302_030318",
+    "taxonomy": {
+      "family": "Vibrionaceae",
+      "genus": "Vibrio",
+      "species": "V. cholerae"
+    },
+    "bacilli_count": 78,
+    "features": {
+      "mean_intensity": 242.56971666666666,
+      "std_intensity": 17.585264368775416,
+      "height": 300,
+      "width": 400,
+      "aspect_ratio": 1.3333333333333333,
+      "num_contours": 272,
+      "mean_circularity": 0.05931269460149872
+    },
+    "notes": "Эксклюзивный пример #3 - холерный вибрион (изогнутые запятые)",
+    "exclusive": true
+  },
+  {
+    "id": 3,
+    "filename": "exclusive_04.jpg",
+    "hash": "afe407b10b7322fa5ace70a263b49704",
+    "timestamp": "20260302_030604",
+    "taxonomy": {
+      "family": "Streptococcaceae",
+      "genus": "Streptococcus",
+      "species": "S. pyogenes"
+    },
+    "bacilli_count": 49,
+    "features": {
+      "mean_intensity": 225.355475,
+      "std_intensity": 58.79659014368414,
+      "height": 300,
+      "width": 400,
+      "aspect_ratio": 1.3333333333333333,
+      "num_contours": 138,
+      "mean_circularity": 0.06777167708869082
+    },
+    "notes": "Эксклюзивный пример #4 - стрептококк (цепочки кокков)",
+    "exclusive": true
+  },
+  {
+    "id": 4,
+    "filename": "exclusive_05.jpg",
+    "hash": "dbd6cd49d73ca57c1e2dcd1dd27d455e",
+    "timestamp": "20260302_030824",
+    "taxonomy": {
+      "family": "Brucellaceae",
+      "genus": "Brucella",
+      "species": "B. melitensis"
+    },
+    "bacilli_count": 42,
+    "features": {
+      "mean_intensity": 240.31259166666666,
+      "std_intensity": 35.12827770875287,
+      "height": 300,
+      "width": 400,
+      "aspect_ratio": 1.3333333333333333,
+      "num_contours": 191,
+      "mean_circularity": 0.24736145608925597
+    },
+    "notes": "Эксклюзивный пример #5 - бруцеллез (очень мелкие кокки)",
+    "exclusive": true
+  },
+  {
+    "id": 5,
+    "filename": "exclusive_06.jpg",
+    "hash": "3d4dfc9d7a9b46af15ffd42f0d461086",
+    "timestamp": "20260302_031019",
+    "taxonomy": {
+      "family": "Enterobacteriaceae",
+      "genus": "Escherichia",
+      "species": "E. coli"
+    },
+    "bacilli_count": 66,
+    "features": {
+      "mean_intensity": 231.71860833333332,
+      "std_intensity": 37.4513561445145,
+      "height": 300,
+      "width": 400,
+      "aspect_ratio": 1.3333333333333333,
+      "num_contours": 204,
+      "mean_circularity": 0.12044879811017108
+    },
+    "notes": "Эксклюзивный пример #6 - кишечная палочка (грамотрицательные)",
+    "exclusive": true
+  },
+  {
+    "id": 6,
+    "filename": "exclusive_07.jpg",
+    "hash": "0b5dc5fb412a859d447703bba52b10b8",
+    "timestamp": "20260302_031202",
+    "taxonomy": {
+      "family": "Bacillaceae",
+      "genus": "Bacillus",
+      "species": "B. anthracis"
+    },
+    "bacilli_count": 48,
+    "features": {
+      "mean_intensity": 223.91105,
+      "std_intensity": 55.18489607278577,
+      "height": 300,
+      "width": 400,
+      "aspect_ratio": 1.3333333333333333,
+      "num_contours": 182,
+      "mean_circularity": 0.07283657651758559
+    },
+    "notes": "Эксклюзивный пример #7 - сибирская язва (крупные палочки со спорами)",
+    "exclusive": true
+  },
+  {
+    "id": 7,
+    "filename": "exclusive_08.jpg",
+    "hash": "fc6edf04994b35e139592a03fe166800",
+    "timestamp": "20260302_031437",
+    "taxonomy": {
+      "family": "Clostridiaceae",
+      "genus": "Clostridium",
+      "species": "C. tetani"
+    },
+    "bacilli_count": 79,
+    "features": {
+      "mean_intensity": 234.10134166666666,
+      "std_intensity": 42.07691574010541,
+      "height": 300,
+      "width": 400,
+      "aspect_ratio": 1.3333333333333333,
+      "num_contours": 267,
+      "mean_circularity": 0.06848239248313566
+    },
+    "notes": "Эксклюзивный пример #8 - столбняк (палочки с терминальными спорами)",
+    "exclusive": true
+  },
+  {
+    "id": 8,
+    "filename": "exclusive_09.jpg",
+    "hash": "0b58badecb92c3769f4c2ef1bf0cc17d",
+    "timestamp": "20260302_031626",
+    "taxonomy": {
+      "family": "Campylobacteriaceae",
+      "genus": "Campylobacter",
+      "species": "C. jejuni"
+    },
+    "bacilli_count": 84,
+    "features": {
+      "mean_intensity": 240.96101666666667,
+      "std_intensity": 28.08980533277252,
+      "height": 300,
+      "width": 400,
+      "aspect_ratio": 1.3333333333333333,
+      "num_contours": 282,
+      "mean_circularity": 0.0607464421863591
+    },
+    "notes": "Эксклюзивный пример #9 - кампилобактер (S-образные палочки)",
+    "exclusive": true
+  },
+  {
+    "id": 9,
+    "filename": "exclusive_10.jpg",
+    "hash": "c8e52db7a796ced549ec0f144fe5ea35",
+    "timestamp": "20260302_031811",
+    "taxonomy": {
+      "family": "Enterobacteriaceae",
+      "genus": "Shigella",
+      "species": "S. dysenteriae"
+    },
+    "bacilli_count": 91,
+    "features": {
+      "mean_intensity": 236.6463,
+      "std_intensity": 33.09594304911102,
+      "height": 300,
+      "width": 400,
+      "aspect_ratio": 1.3333333333333333,
+      "num_contours": 274,
+      "mean_circularity": 0.09711056561255269
+    },
+    "notes": "Эксклюзивный пример #10 - шигеллез (грамотрицательные палочки)",
+    "exclusive": true
+  },
+  {
+    "id": 10,
+    "filename": "exclusive_11.jpg",
+    "hash": "a78610b754ffe36d2f55c45e57d272f0",
+    "timestamp": "20260302_031946",
+    "taxonomy": {
+      "family": "Francisellaceae",
+      "genus": "Francisella",
+      "species": "F. tularensis"
+    },
+    "bacilli_count": 52,
+    "features": {
+      "mean_intensity": 240.32515,
+      "std_intensity": 34.01028340777977,
+      "height": 300,
+      "width": 400,
+      "aspect_ratio": 1.3333333333333333,
+      "num_contours": 228,
+      "mean_circularity": 0.20817520509751836
+    },
+    "notes": "Эксклюзивный пример #11 - туляремия (очень мелкие коккобактерии)",
+    "exclusive": true
+  },
+  {
+    "id": 11,
+    "filename": "exclusive_12.jpg",
+    "hash": "c31c47d91ff99ff6bcb77957487f906d",
+    "timestamp": "20260302_032210",
+    "taxonomy": {
+      "family": "Yersiniaceae",
+      "genus": "Yersinia",
+      "species": "Y. pestis"
+    },
+    "bacilli_count": 8,
+    "features": {
+      "mean_intensity": 241.83185833333334,
+      "std_intensity": 25.491485245991402,
+      "height": 300,
+      "width": 400,
+      "aspect_ratio": 1.3333333333333333,
+      "num_contours": 17,
+      "mean_circularity": 0.5547307307451648
+    },
+    "notes": "Эксклюзивный пример #12 - чума (палочки с биполярным окрашиванием)",
+    "exclusive": true
+  },
+  {
+    "id": 12,
+    "filename": "exclusive_13.jpg",
+    "hash": "d39fc23e9f9546139d8c9c83a271db27",
+    "timestamp": "20260302_032416",
+    "taxonomy": {
+      "family": "Leptospiraceae",
+      "genus": "Leptospira",
+      "species": "L. interrogans"
+    },
+    "bacilli_count": 55,
+    "features": {
+      "mean_intensity": 231.39961666666667,
+      "std_intensity": 49.791322435270345,
+      "height": 300,
+      "width": 400,
+      "aspect_ratio": 1.3333333333333333,
+      "num_contours": 193,
+      "mean_circularity": 0.050718857840822064
+    },
+    "notes": "Эксклюзивный пример #13 - лептоспироз (тонкие спиралевидные бактерии)",
+    "exclusive": true
+  },
+  {
+    "id": 13,
+    "filename": "exclusive_14.jpg",
+    "hash": "300f4b8512a0b83f3b260ea1b63fb012",
+    "timestamp": "20260302_032623",
+    "taxonomy": {
+      "family": "Mycobacteriaceae",
+      "genus": "Mycobacterium",
+      "species": "M. leprae"
+    },
+    "bacilli_count": 78,
+    "features": {
+      "mean_intensity": 230.81633333333335,
+      "std_intensity": 49.02239845100288,
+      "height": 300,
+      "width": 400,
+      "aspect_ratio": 1.3333333333333333,
+      "num_contours": 248,
+      "mean_circularity": 0.061548114959001046
+    },
+    "notes": "Эксклюзивный пример #14 - проказа (кислотоустойчивые палочки)",
+    "exclusive": true
+  },
+  {
+    "id": 14,
+    "filename": "exclusive_15.jpg",
+    "hash": "12de030a60c8ad7c3c9b76ac25409c87",
+    "timestamp": "20260302_032917",
+    "taxonomy": {
+      "family": "Clostridiaceae",
+      "genus": "Clostridium",
+      "species": "C. botulinum"
+    },
+    "bacilli_count": 61,
+    "features": {
+      "mean_intensity": 218.58833333333334,
+      "std_intensity": 64.22763136342142,
+      "height": 300,
+      "width": 400,
+      "aspect_ratio": 1.3333333333333333,
+      "num_contours": 247,
+      "mean_circularity": 0.052987815279858255
+    },
+    "notes": "Эксклюзивный пример #15 - ботулизм (очень крупные палочки с большими спорами)",
+    "exclusive": true
+  },
+  {
+    "id": 15,
+    "filename": "exclusive_16.jpg",
+    "hash": "fae90f5b7c34dbdaa62f64aaa14acdf0",
+    "timestamp": "20260302_033215",
+    "taxonomy": {
+      "family": "Helicobacteraceae",
+      "genus": "Helicobacter",
+      "species": "H. pylori"
+    },
+    "bacilli_count": 69,
+    "features": {
+      "mean_intensity": 234.155075,
+      "std_intensity": 43.03214043105117,
+      "height": 300,
+      "width": 400,
+      "aspect_ratio": 1.3333333333333333,
+      "num_contours": 225,
+      "mean_circularity": 0.04056141596333371
+    },
+    "notes": "Эксклюзивный пример #16 - хеликобактериоз (спиралевидные с жгутиками)",
+    "exclusive": true
+  },
+  {
+    "id": 16,
+    "filename": "exclusive_17.jpg",
+    "hash": "0c67191a4e9fa2390e24c60824fa2ee1",
+    "timestamp": "20260302_033358",
+    "taxonomy": {
+      "family": "Enterobacteriaceae",
+      "genus": "Salmonella",
+      "species": "S. typhi"
+    },
+    "bacilli_count": 67,
+    "features": {
+      "mean_intensity": 237.82401666666667,
+      "std_intensity": 33.90483613291358,
+      "height": 300,
+      "width": 400,
+      "aspect_ratio": 1.3333333333333333,
+      "num_contours": 271,
+      "mean_circularity": 0.04414714045010508
+    },
+    "notes": "Эксклюзивный пример #17 - брюшной тиф (палочки с перитрихиальными жгутиками)",
+    "exclusive": true
+  },
+  {
+    "id": 17,
+    "filename": "exclusive_18.jpg",
+    "hash": "8f88b37061b3505d9a28378cb034f554",
+    "timestamp": "20260302_033607",
+    "taxonomy": {
+      "family": "Neisseriaceae",
+      "genus": "Neisseria",
+      "species": "N. gonorrhoeae"
+    },
+    "bacilli_count": 66,
+    "features": {
+      "mean_intensity": 220.525125,
+      "std_intensity": 61.70680272115635,
+      "height": 300,
+      "width": 400,
+      "aspect_ratio": 1.3333333333333333,
+      "num_contours": 230,
+      "mean_circularity": 0.051992256108577606
+    },
+    "notes": "Эксклюзивный пример #18 - гонорея (диплококки - пары кофейных зерен)",
+    "exclusive": true
+  },
+  {
+    "id": 18,
+    "filename": "exclusive_19.jpg",
+    "hash": "5504a681ecb20a08761a1d33d59d9868",
+    "timestamp": "20260302_033754",
+    "taxonomy": {
+      "family": "Clostridiaceae",
+      "genus": "Clostridium",
+      "species": "C. perfringens"
+    },
+    "bacilli_count": 52,
+    "features": {
+      "mean_intensity": 214.2527,
+      "std_intensity": 65.29826217220486,
+      "height": 300,
+      "width": 400,
+      "aspect_ratio": 1.3333333333333333,
+      "num_contours": 209,
+      "mean_circularity": 0.05971144226869746
+    },
+    "notes": "Эксклюзивный пример #19 - газовая гангрена (очень крупные палочки с терминальными спорами)",
+    "exclusive": true
+  }
+]
