@@ -8,33 +8,11 @@ import os
 import hashlib
 import json
 import random
-
-# Импортируем эксклюзивный тренер
-try:
-    from exclusive_trainer import classify_exclusive_bacteria, get_exclusive_status
-    EXCLUSIVE_MODE = True
-except ImportError:
-    EXCLUSIVE_MODE = False
-    def classify_exclusive_bacteria(image):
-        return {
-            "Тұқымдастығы": "❌ Система недоступна",
-            "Туыстастық": "❌ Система недоступна", 
-            "Түрі": "❌ Система недоступна",
-            "error": "Эксклюзивный модуль не найден"
-        }
-    
-    def get_exclusive_status():
-        return {
-            "total": 20,
-            "max": 20,
-            "percentage": 100,
-            "remaining": 0,
-            "ready": True
-        }
+import cv2
 
 # Настройка страницы
 st.set_page_config(
-    page_title="🦠 Эксклюзивная Система Определения Бактерий",
+    page_title="🦠 Универсальная Система Определения Бактерий",
     page_icon="🧬",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -90,16 +68,6 @@ def load_css():
         border: 2px solid #4caf50;
         margin: 20px 0;
         box-shadow: 0 10px 30px rgba(76, 175, 80, 0.2);
-    }
-    
-    /* Карточки ошибок */
-    .error-box {
-        background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
-        padding: 25px;
-        border-radius: 15px;
-        border: 2px solid #f44336;
-        margin: 20px 0;
-        box-shadow: 0 10px 30px rgba(244, 67, 54, 0.2);
     }
     
     /* Карточки информации */
@@ -158,21 +126,6 @@ def load_css():
         box-shadow: 0 5px 15px rgba(0,0,0,0.2);
     }
     
-    /* Прогресс бар */
-    .progress-container {
-        background: #e0e0e0;
-        border-radius: 10px;
-        overflow: hidden;
-        margin: 10px 0;
-    }
-    
-    .progress-bar {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        height: 20px;
-        border-radius: 10px;
-        transition: width 0.5s ease;
-    }
-    
     /* Анимация */
     @keyframes fadeIn {
         from { opacity: 0; transform: translateY(20px); }
@@ -181,11 +134,6 @@ def load_css():
     
     .fade-in {
         animation: fadeIn 0.5s ease-out;
-    }
-    
-    /* Скрытие стандартных элементов */
-    .stDeployButton {
-        display: none;
     }
     
     /* Улучшенные метрики */
@@ -230,38 +178,244 @@ def create_logo_section():
     <div class="main-header fade-in">
         <h1 style="margin: 0; font-size: 3em; font-weight: bold;">🦠 Казахский Национальный Медицинский Университет</h1>
         <p style="margin: 15px 0 0 0; font-size: 1.4em; opacity: 0.9;">имени С.Д. Асфендиярова</p>
-        <p style="margin: 10px 0 0 0; font-size: 1.2em; opacity: 0.8;">🧬 Эксклюзивная Система Определения Бактерий</p>
+        <p style="margin: 10px 0 0 0; font-size: 1.2em; opacity: 0.8;">🧬 Универсальная Система Определения Бактерий</p>
         <div style="margin-top: 20px; padding: 10px 20px; background: rgba(255,255,255,0.2); border-radius: 25px; display: inline-block;">
-            <span style="font-weight: bold;">🎯 20 Бактерий • 🔒 100% Эксклюзивность • 🌐 Всемирный Доступ</span>
+            <span style="font-weight: bold;">🎯 20 Эталонов • 🔍 Сравнение • 🌐 Универсальный Доступ</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-def display_styled_predictions(predictions):
-    """Отображает стилизованные предсказания"""
-    if "error" in predictions:
+def load_reference_samples():
+    """Загружает 20 эталонных изображений"""
+    try:
+        with open('exclusive_database/exclusive.json', 'r', encoding='utf-8') as f:
+            samples = json.load(f)
+        return samples
+    except:
+        return []
+
+def extract_features(image_array):
+    """Извлекает признаки из изображения"""
+    try:
+        # Конвертируем в grayscale
+        if len(image_array.shape) == 3:
+            gray = cv2.cvtColor(image_array, cv2.COLOR_RGB2GRAY)
+        else:
+            gray = image_array
+        
+        # Базовые признаки
+        height, width = gray.shape
+        mean_intensity = np.mean(gray)
+        std_intensity = np.std(gray)
+        
+        # Детекция контуров
+        blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+        edges = cv2.Canny(blurred, 50, 150)
+        contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        
+        # Фильтруем контуры
+        valid_contours = []
+        for contour in contours:
+            area = cv2.contourArea(contour)
+            if 10 < area < 10000:  # Фильтруем шум
+                valid_contours.append(contour)
+        
+        num_contours = len(valid_contours)
+        
+        # Вычисляем среднюю круглость
+        circularities = []
+        for contour in valid_contours:
+            perimeter = cv2.arcLength(contour, True)
+            area = cv2.contourArea(contour)
+            if perimeter > 0:
+                circularity = 4 * np.pi * area / (perimeter ** 2)
+                circularities.append(circularity)
+        
+        mean_circularity = np.mean(circularities) if circularities else 0
+        
+        return {
+            'mean_intensity': mean_intensity,
+            'std_intensity': std_intensity,
+            'height': height,
+            'width': width,
+            'aspect_ratio': width / height,
+            'num_contours': num_contours,
+            'mean_circularity': mean_circularity
+        }
+    except Exception as e:
+        # В случае ошибки возвращаем базовые признаки
+        height, width = image_array.shape[:2]
+        return {
+            'mean_intensity': np.mean(image_array),
+            'std_intensity': np.std(image_array),
+            'height': height,
+            'width': width,
+            'aspect_ratio': width / height,
+            'num_contours': 0,
+            'mean_circularity': 0
+        }
+
+def count_bacilli(image_array):
+    """Подсчитывает палочковидные бактерии"""
+    try:
+        # Конвертируем в grayscale
+        if len(image_array.shape) == 3:
+            gray = cv2.cvtColor(image_array, cv2.COLOR_RGB2GRAY)
+        else:
+            gray = image_array
+        
+        # Бинаризация
+        _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+        
+        # Морфологические операции
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 1))
+        binary = cv2.morphologyEx(binary, cv2.MORPH_OPEN, kernel)
+        
+        # Детекция контуров
+        contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        
+        # Фильтруем палочковидные контуры
+        bacilli_count = 0
+        for contour in contours:
+            area = cv2.contourArea(contour)
+            if 20 < area < 5000:  # Размер палочек
+                # Проверяем соотношение сторон
+                x, y, w, h = cv2.boundingRect(contour)
+                aspect_ratio = w / h
+                if 0.2 < aspect_ratio < 5:  # Палочковидная форма
+                    bacilli_count += 1
+        
+        return bacilli_count
+    except:
+        return 0
+
+def calculate_similarity(features1, features2):
+    """Вычисляет схожесть между двумя наборами признаков"""
+    similarity = 0
+    total_weight = 0
+    
+    # Вес для каждого признака
+    weights = {
+        'mean_intensity': 0.2,
+        'std_intensity': 0.1,
+        'aspect_ratio': 0.1,
+        'num_contours': 0.3,
+        'mean_circularity': 0.3
+    }
+    
+    for feature, weight in weights.items():
+        if feature in features1 and feature in features2:
+            # Нормализуем разницу
+            diff = abs(features1[feature] - features2[feature])
+            max_val = max(abs(features1[feature]), abs(features2[feature]), 1)
+            normalized_diff = diff / max_val
+            similarity_score = 1 - normalized_diff
+            similarity += similarity_score * weight
+            total_weight += weight
+    
+    return similarity / total_weight if total_weight > 0 else 0
+
+def classify_with_reference(image_array, reference_samples):
+    """Классифицирует изображение сравнивая с эталонами"""
+    current_features = extract_features(image_array)
+    current_bacilli = count_bacilli(image_array)
+    
+    best_match = None
+    best_score = 0
+    
+    for sample in reference_samples:
+        if 'features' in sample:
+            similarity = calculate_similarity(current_features, sample['features'])
+            
+            # Добавляем бонус за схожесть количества палочек
+            if 'bacilli_count' in sample:
+                bacilli_diff = abs(current_bacilli - sample['bacilli_count'])
+                bacilli_similarity = max(0, 1 - bacilli_diff / 50)  # Нормализуем разницу
+                similarity = (similarity * 0.8) + (bacilli_similarity * 0.2)
+            
+            if similarity > best_score:
+                best_score = similarity
+                best_match = sample
+    
+    if best_match and best_score > 0.3:  # Порог схожести
+        tax = best_match["taxonomy"]
+        confidence = min(best_score * 100, 95)
+        
+        return {
+            "Тұқымдастығы": f"{tax['family']} ({confidence:.0f}%)",
+            "Туыстастық": f"{tax['genus']} ({confidence:.0f}%)",
+            "Түрі": f"{tax['species']} ({confidence:.0f}%)",
+            "match_id": best_match["id"],
+            "confidence": confidence,
+            "similarity_score": best_score,
+            "bacilli_count": current_bacilli,
+            "reference_sample": best_match["filename"]
+        }
+    else:
+        return {
+            "Тұқымдастығы": "❌ Не определено",
+            "Туыстастық": "❌ Не определено",
+            "Түрі": "❌ Не определено",
+            "error": "Изображение не похоже ни на один из эталонов",
+            "best_score": best_score,
+            "bacilli_count": current_bacilli
+        }
+
+def display_reference_samples(reference_samples):
+    """Отображает эталонные образцы"""
+    st.markdown('<div class="section-header fade-in">📚 Эталонные Образцы Бактерий</div>', unsafe_allow_html=True)
+    
+    # Группируем по семействам
+    families = {}
+    for sample in reference_samples:
+        family = sample["taxonomy"]["family"]
+        if family not in families:
+            families[family] = []
+        families[family].append(sample)
+    
+    for family, samples in families.items():
+        st.markdown(f"### 🏛️ {family}")
+        
+        cols = st.columns(min(len(samples), 4))
+        for i, sample in enumerate(samples):
+            with cols[i % 4]:
+                # Отображаем изображение если доступно
+                image_path = f"exclusive_database/images/{sample['filename']}"
+                if os.path.exists(image_path):
+                    try:
+                        image = Image.open(image_path)
+                        st.image(image, caption=f"{sample['taxonomy']['genus']} {sample['taxonomy']['species']}", use_column_width=True)
+                    except:
+                        st.write(f"🦠 {sample['taxonomy']['genus']} {sample['taxonomy']['species']}")
+                else:
+                    st.write(f"🦠 {sample['taxonomy']['genus']} {sample['taxonomy']['species']}")
+
+def display_classification_results(result, reference_samples):
+    """Отображает результаты классификации"""
+    if "error" in result:
         st.markdown(f"""
-        <div class="error-box fade-in">
-            <h3 style="color: #f44336; margin: 0 0 15px 0;">❌ {predictions['error']}</h3>
-            <p style="color: #666; margin: 0;">Это изображение не входит в эксклюзивную базу из 20 бактерий.</p>
+        <div class="info-box fade-in">
+            <h3 style="color: #ff9800; margin: 0 0 15px 0;">⚠️ {result['error']}</h3>
+            <p style="color: #666; margin: 0;">Наилучшее совпадение: {result['best_score']:.2f}</p>
         </div>
         """, unsafe_allow_html=True)
     else:
         st.markdown(f"""
         <div class="success-box fade-in">
-            <h3 style="color: #4caf50; margin: 0 0 15px 0;">✅ Изображение распознано!</h3>
+            <h3 style="color: #4caf50; margin: 0 0 15px 0;">✅ Найдено совпадение!</h3>
+            <p style="color: #666; margin: 0;">Схожесть с эталоном: {result['similarity_score']:.2f}</p>
         </div>
         """, unsafe_allow_html=True)
         
         st.markdown('<div class="prediction-box fade-in">', unsafe_allow_html=True)
         st.subheader("🧬 Результаты определения таксономии")
         
-        for label, prediction in predictions.items():
-            if label not in ['bacilli_count', 'match_id', 'confidence', 'best_score']:
+        for label, prediction in result.items():
+            if label not in ['bacilli_count', 'match_id', 'confidence', 'similarity_score', 'reference_sample', 'best_score', 'error']:
                 st.markdown(f"**{label}:** {prediction}")
         
-        if 'bacilli_count' in predictions:
-            st.markdown(f"**🔬 Обнаружено палочек:** {predictions['bacilli_count']}")
+        st.markdown(f"**🔬 Обнаружено палочек:** {result['bacilli_count']}")
+        st.markdown(f"**📁 Эталонный образец:** {result.get('reference_sample', 'N/A')}")
         
         st.markdown('</div>', unsafe_allow_html=True)
         
@@ -269,115 +423,34 @@ def display_styled_predictions(predictions):
         col1, col2, col3 = st.columns(3)
         
         with col1:
-            confidence_str = predictions.get("Тұқымдастығы", "0%")
-            if "(" in confidence_str:
-                confidence = float(confidence_str.split("(")[-1].replace(")", "").replace("%", ""))
-            else:
-                confidence = 0
-            
             st.markdown(f"""
             <div class="metric-card fade-in">
                 <h3 style="color: #667eea; margin: 0 0 10px 0;">🏛️ Семейство</h3>
-                <h2 style="color: #4caf50; margin: 0; font-size: 2em;">{confidence:.0f}%</h2>
-                <p style="color: #666; margin: 5px 0 0 0;">точность</p>
+                <h2 style="color: #4caf50; margin: 0; font-size: 2em;">{result['confidence']:.0f}%</h2>
+                <p style="color: #666; margin: 5px 0 0 0;">уверенность</p>
             </div>
             """, unsafe_allow_html=True)
         
         with col2:
-            confidence_str = predictions.get("Туыстастық", "0%")
-            if "(" in confidence_str:
-                confidence = float(confidence_str.split("(")[-1].replace(")", "").replace("%", ""))
-            else:
-                confidence = 0
-            
             st.markdown(f"""
             <div class="metric-card fade-in" style="animation-delay: 0.1s;">
-                <h3 style="color: #667eea; margin: 0 0 10px 0;">🌿 Род</h3>
-                <h2 style="color: #4caf50; margin: 0; font-size: 2em;">{confidence:.0f}%</h2>
-                <p style="color: #666; margin: 5px 0 0 0;">точность</p>
+                <h3 style="color: #667eea; margin: 0 0 10px 0;">🎯 Схожесть</h3>
+                <h2 style="color: #2196f3; margin: 0; font-size: 2em;">{result['similarity_score']:.2f}</h2>
+                <p style="color: #666; margin: 5px 0 0 0;">балл</p>
             </div>
             """, unsafe_allow_html=True)
         
         with col3:
-            confidence_str = predictions.get("Түрі", "0%")
-            if "(" in confidence_str:
-                confidence = float(confidence_str.split("(")[-1].replace(")", "").replace("%", ""))
-            else:
-                confidence = 0
-            
             st.markdown(f"""
             <div class="metric-card fade-in" style="animation-delay: 0.2s;">
-                <h3 style="color: #667eea; margin: 0 0 10px 0;">🔬 Вид</h3>
-                <h2 style="color: #4caf50; margin: 0; font-size: 2em;">{confidence:.0f}%</h2>
-                <p style="color: #666; margin: 5px 0 0 0;">точность</p>
+                <h3 style="color: #667eea; margin: 0 0 10px 0;">🦠 Палочки</h3>
+                <h2 style="color: #ff9800; margin: 0; font-size: 2em;">{result['bacilli_count']}</h2>
+                <p style="color: #666; margin: 5px 0 0 0;">штук</p>
             </div>
             """, unsafe_allow_html=True)
 
-def display_styled_status():
-    """Отображает стилизованный статус системы"""
-    status = get_exclusive_status()
-    
-    st.markdown('<div class="section-header fade-in">📊 Статус Эксклюзивной Системы</div>', unsafe_allow_html=True)
-    
-    col1, col2, col3, col4 = st.columns(4)
-    
-    with col1:
-        st.markdown(f"""
-        <div class="metric-card fade-in">
-            <h3 style="color: #667eea; margin: 0 0 10px 0;">📁 База данных</h3>
-            <h2 style="color: #4caf50; margin: 0; font-size: 2em;">{status['total']}/{status['max']}</h2>
-            <p style="color: #666; margin: 5px 0 0 0;">бактерий</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown(f"""
-        <div class="metric-card fade-in" style="animation-delay: 0.1s;">
-            <h3 style="color: #667eea; margin: 0 0 10px 0;">📈 Прогресс</h3>
-            <h2 style="color: #4caf50; margin: 0; font-size: 2em;">{status['percentage']:.0f}%</h2>
-            <p style="color: #666; margin: 5px 0 0 0;">заполнено</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col3:
-        st.markdown(f"""
-        <div class="metric-card fade-in" style="animation-delay: 0.2s;">
-            <h3 style="color: #667eea; margin: 0 0 10px 0;">🔄 Осталось</h3>
-            <h2 style="color: #ff9800; margin: 0; font-size: 2em;">{status['remaining']}</h2>
-            <p style="color: #666; margin: 5px 0 0 0;">слотов</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col4:
-        ready_color = "#4caf50" if status['ready'] else "#f44336"
-        ready_text = "ДА" if status['ready'] else "НЕТ"
-        ready_icon = "✅" if status['ready'] else "❌"
-        
-        st.markdown(f"""
-        <div class="metric-card fade-in" style="animation-delay: 0.3s;">
-            <h3 style="color: #667eea; margin: 0 0 10px 0;">✅ Готовность</h3>
-            <h2 style="color: {ready_color}; margin: 0; font-size: 2em;">{ready_icon} {ready_text}</h2>
-            <p style="color: #666; margin: 5px 0 0 0;">статус</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    # Прогресс бар
-    st.markdown(f"""
-    <div class="progress-container fade-in" style="animation-delay: 0.4s;">
-        <div class="progress-bar" style="width: {status['percentage']}%;"></div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    if status['ready']:
-        st.markdown(f"""
-        <div class="success-box fade-in" style="animation-delay: 0.5s;">
-            <h3 style="color: #4caf50; margin: 0;">🎉 Система полностью готова к использованию!</h3>
-            <p style="color: #666; margin: 5px 0 0 0;">Все 20 бактерий добавлены в базу данных.</p>
-        </div>
-        """, unsafe_allow_html=True)
-
 def main():
-    """Главная функция приложения с упрощенным дизайном"""
+    """Главная функция универсального классификатора"""
     # Загружаем CSS
     load_css()
     
@@ -387,38 +460,49 @@ def main():
     # Заголовок
     st.markdown("""
     <div style="text-align: center; padding: 25px; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); border-radius: 15px; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
-        <h2 style="color: #667eea; margin: 0; font-size: 2em;">🔒 Эксклюзивная Система Классификации Бактерий</h2>
-        <p style="color: #666; margin: 10px 0 0 0; font-size: 1.1em;">Только 20 эксклюзивных бактерий • 100% точность • Полная защита</p>
+        <h2 style="color: #667eea; margin: 0; font-size: 2em;">🔍 Универсальный Классификатор Бактерий</h2>
+        <p style="color: #666; margin: 10px 0 0 0; font-size: 1.1em;">Сравнение с 20 эталонами • Автоматическое определение • Точная таксономия</p>
     </div>
     """, unsafe_allow_html=True)
     
-    # Статус системы
-    display_styled_status()
+    # Загружаем эталонные образцы
+    reference_samples = load_reference_samples()
+    
+    # Показываем эталоны
+    if reference_samples:
+        display_reference_samples(reference_samples)
+    else:
+        st.error("❌ Эталонные образцы не найдены!")
+        return
     
     # Загрузка изображения
     st.markdown("---")
-    st.markdown('<div class="section-header fade-in">📸 Загрузите Изображение Бактерии</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header fade-in">📸 Загрузите Изображение для Классификации</div>', unsafe_allow_html=True)
     
     uploaded_file = st.file_uploader(
         "Выберите микроскопическое изображение",
         type=['jpg', 'jpeg', 'png', 'bmp'],
-        help="Загрузите изображение для классификации"
+        help="Загрузите изображение для сравнения с эталонами"
     )
     
     # Боковая панель с параметрами
     st.sidebar.markdown("### ⚙️ Параметры Классификации")
     
-    if EXCLUSIVE_MODE:
-        st.sidebar.success("🔒 Режим: Эксклюзивный")
-    else:
-        st.sidebar.error("❌ Режим: Офлайн")
+    st.sidebar.success("🔍 Режим: Универсальный")
     
-    confidence_threshold = st.sidebar.slider(
-        "📊 Порог уверенности (%)",
-        min_value=50,
-        max_value=98,
-        value=70,
-        help="Минимальный уровень уверенности"
+    similarity_threshold = st.sidebar.slider(
+        "📊 Порог схожести",
+        min_value=0.1,
+        max_value=0.9,
+        value=0.3,
+        step=0.1,
+        help="Минимальный уровень схожести для распознавания"
+    )
+    
+    show_comparison = st.sidebar.checkbox(
+        "📊 Показать сравнение с эталонами",
+        value=True,
+        help="Отображать подробное сравнение"
     )
     
     if uploaded_file is not None:
@@ -434,45 +518,37 @@ def main():
             st.image(image, caption="Исходное изображение", use_column_width=True)
             
             # Классификация
-            with st.spinner("🧬 Выполняем классификацию бактерии..."):
-                try:
-                    result = classify_exclusive_bacteria(image_array)
-                except Exception as e:
-                    result = {
-                        "Тұқымдастығы": "❌ Система недоступна",
-                        "Туыстастық": "❌ Система недоступна", 
-                        "Түрі": "❌ Система недоступна",
-                        "error": f"Ошибка классификации: {str(e)}"
-                    }
+            with st.spinner("🔍 Сравниваем с эталонными образцами..."):
+                result = classify_with_reference(image_array, reference_samples)
             
             # Отображаем результаты
             st.markdown("---")
             st.markdown('<div class="section-header fade-in">🧬 Результаты Классификации</div>', unsafe_allow_html=True)
             
-            display_styled_predictions(result)
+            display_classification_results(result, reference_samples)
             
-            if "error" in result:
+            # Показываем подробное сравнение
+            if show_comparison and "error" not in result:
                 st.markdown("---")
-                st.markdown('<div class="info-box fade-in">', unsafe_allow_html=True)
-                st.subheader("ℹ️ Почему изображение не распознано?")
-                st.markdown("""
-                **Причины:**
-                - 🔒 Изображение не входит в эксклюзивную базу из 20 бактерий
-                - 🛡️ Система защищена от распознавания посторонних изображений
-                - 📋 Только заранее добавленные фото будут распознаны
+                st.markdown('<div class="section-header fade-in">📊 Подробное Сравнение</div>', unsafe_allow_html=True)
                 
-                **Что делать:**
-                1. Используйте одно из 20 эксклюзивных изображений
-                2. Или добавьте новое изображение в систему
-                3. Проверьте правильность файла
+                current_features = extract_features(image_array)
+                current_bacilli = count_bacilli(image_array)
                 
-                **Список эксклюзивных бактерий:**
-                - S. aureus, N. meningitidis, V. cholerae, S. pyogenes, B. melitensis
-                - E. coli, B. anthracis, C. tetani, C. jejuni, S. dysenteriae
-                - F. tularensis, Y. pestis, L. interrogans, M. leprae, C. botulinum
-                - H. pylori, S. typhi, N. gonorrhoeae, C. perfringens, Clostridium perfringens
-                """)
-                st.markdown('</div>', unsafe_allow_html=True)
+                st.markdown("### 🔍 Признаки загруженного изображения:")
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    st.write(f"**Средняя интенсивность:** {current_features['mean_intensity']:.2f}")
+                    st.write(f"**Стандартное отклонение:** {current_features['std_intensity']:.2f}")
+                    st.write(f"**Размер:** {current_features['width']}×{current_features['height']}")
+                
+                with col2:
+                    st.write(f"**Соотношение сторон:** {current_features['aspect_ratio']:.2f}")
+                    st.write(f"**Количество контуров:** {current_features['num_contours']}")
+                    st.write(f"**Средняя круглость:** {current_features['mean_circularity']:.3f}")
+                
+                st.write(f"**🦠 Обнаружено палочек:** {current_bacilli}")
             
         except Exception as e:
             st.error(f"❌ Ошибка при обработке изображения: {e}")
@@ -489,21 +565,24 @@ def main():
         
         with st.expander("📖 Как использовать систему"):
             st.markdown("""
-            ### 🔒 Эксклюзивная система классификации:
+            ### 🔍 Универсальный классификатор:
             1. **Загрузите изображение бактерии** - система проанализирует его
-            2. **Получите результат** - таксономия или сообщение об ошибке
-            3. **Проверьте точность** - уверенность будет показана в процентах
-            4. **Эксклюзивность** - только 20 фото будут распознаны
+            2. **Сравнение с эталонами** - найдет наиболее похожий образец
+            3. **Получите таксономию** - семейство, род, вид с уверенностью
+            4. **Подсчет палочек** - автоматическое определение количества
             
             **🎯 Что работает:**
-            - ✅ Классификация 20 эксклюзивных бактерий
+            - ✅ Сравнение с 20 эталонными изображениями
             - ✅ Определение таксономии (семейство, род, вид)
-            - ✅ Подсчет палочек для распознанных бактерий
-            - ✅ Полная защита от посторонних изображений
+            - ✅ Автоматический подсчет палочек
+            - ✅ Уверенность в процентах
+            - ✅ Подробное сравнение признаков
             
-            **🔒 Эксклюзивность:**
-            - Только 20 фото распознаются с таксономией
-            - Все остальные показывают ошибку
+            **🔍 Метод сравнения:**
+            - Анализ признаков изображения
+            - Вычисление схожести с эталонами
+            - Выбор наилучшего совпадения
+            - Определение таксономии
             """)
         
         with st.expander("ℹ️ О проекте"):
@@ -513,21 +592,22 @@ def main():
             **Разработчик:** Казахский национальный медицинский университет имени С.Д. Асфендиярова
             
             **Технологии:**
-            - 🔒 Эксклюзивная система на 20 фотографиях
-            - 🎯 Точная классификация только на ваших данных
+            - 🔍 Универсальный классификатор на 20 эталонах
+            - 🎯 Сравнение признаков изображения
             - 🎨 Современный веб-интерфейс
             - 🧬 Полная таксономическая классификация
             
             **Функционал:**
-            - Классификация 20 эксклюзивных бактерий
+            - Сравнение с 20 эталонными бактериями
             - Определение таксономии (семейство, род, вид)
             - Автоматическая детекция палочек
-            - Полная защита от посторонних изображений
+            - Подробный анализ признаков
             
             **Метод классификации:**
-            - 🔒 **Только ваши 20 фото** - эксклюзивная база
-            - 🎯 **Хэш-сравнение** - точное определение
-            - 🛡️ **Защита от ошибок** - отклонение чужих фото
+            - 🔍 **Сравнение признаков** - анализ изображения
+            - 🎯 **Вычисление схожести** - математическое сравнение
+            - 📊 **Выбор лучшего** - наилучшее совпадение
+            - 🧬 **Определение таксономии** - результат классификации
             """)
 
 if __name__ == "__main__":
