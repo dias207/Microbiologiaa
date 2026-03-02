@@ -1,56 +1,14 @@
 import streamlit as st
+import cv2
 import numpy as np
 from PIL import Image
 import io
 import base64
-import hashlib
 
-def simple_hash_features(image_array):
-    """Простая функция хэширования без OpenCV"""
-    # Конвертируем в байты
-    image_bytes = Image.fromarray(image_array).tobytes()
-    
-    # Вычисляем MD5 хэш
-    hash_md5 = hashlib.md5()
-    hash_md5.update(image_bytes)
-    return hash_md5.hexdigest()
-
-def simple_classify(image_array, database):
-    """Простая классификация по хэшу"""
-    current_hash = simple_hash_features(image_array)
-    
-    # Ищем точное совпадение по хэшу
-    for item in database:
-        if item['hash'] == current_hash:
-            tax = item["taxonomy"]
-            return {
-                "Тұқымдастық": f"{tax['family']} (98%)",
-                "Туыстастық": f"{tax['genus']} (98%)",
-                "Түрі": f"{tax['species']} (98%)",
-                "match_id": item["id"],
-                "confidence": 98.0,
-                "bacilli_count": item["bacilli_count"]
-            }
-    
-    return {
-        "Тұқымдастық": "❌ Не определено",
-        "Туыстастық": "❌ Не определено", 
-        "Түрі": "❌ Не определено",
-        "error": "Изображение не соответствует эксклюзивной базе",
-        "best_score": 0.0
-    }
-
-def load_database():
-    """Загрузка базы данных"""
-    try:
-        import json
-        with open('exclusive_database/exclusive.json', 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except:
-        return []
+from exclusive_trainer import classify_exclusive_bacteria, get_exclusive_status
 
 def main():
-    """Главная функция без OpenCV"""
+    """Главная функция эксклюзивного приложения"""
     
     # Настройка страницы
     st.set_page_config(
@@ -64,28 +22,23 @@ def main():
     st.markdown("""
     <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #6B46C1, #9333EA); color: white; border-radius: 10px; margin-bottom: 20px;">
         <h1 style="margin: 0;">🦠 Эксклюзивная Система Определения Бактерий</h1>
-        <p style="margin: 0; font-size: 18px;">Только 19 видов бактерий • Точность 98% • Защита от чужих фото</p>
+        <p style="margin: 0; font-size: 18px;">Только 19 видов бактерий • Точность до 98% • Защита от чужих фото</p>
     </div>
     """, unsafe_allow_html=True)
     
-    # Загрузка базы данных
-    database = load_database()
+    # Статус системы
+    status = get_exclusive_status()
     
-    if database:
-        total = len(database)
-        percentage = (total / 20) * 100
-        ready = total >= 3
-        
-        col1, col2, col3 = st.columns(3)
-        
-        with col1:
-            st.metric("📁 База данных", f"{total}/20")
-        
-        with col2:
-            st.metric("📈 Прогресс", f"{percentage:.0f}%")
-        
-        with col3:
-            st.metric("✅ Готовность", "ДА" if ready else "НЕТ")
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.metric("📁 База данных", f"{status['total']}/20")
+    
+    with col2:
+        st.metric("📈 Прогресс", f"{status['percentage']:.0f}%")
+    
+    with col3:
+        st.metric("✅ Готовность", "ДА" if status['ready'] else "НЕТ")
     
     # Загрузка изображения
     st.markdown("---")
@@ -104,9 +57,15 @@ def main():
             image = Image.open(io.BytesIO(image_bytes))
             image_array = np.array(image)
             
+            # Конвертация в BGR для OpenCV
+            if len(image_array.shape) == 3:
+                image_array = cv2.cvtColor(image_array, cv2.COLOR_RGB2BGR)
+            else:
+                image_array = image_array
+            
             # Классификация
             with st.spinner("🔍 Анализ изображения..."):
-                result = simple_classify(image_array, database)
+                result = classify_exclusive_bacteria(image_array)
             
             # Отображение результатов
             st.markdown("---")
@@ -147,7 +106,7 @@ def main():
         st.markdown("""
         ### 🎯 Особенности:
         - **🔒 Эксклюзивная база:** Только 19 определенных бактерий
-        - **🎯 Точность:** 98% на обученных данных  
+        - **🎯 Точность:** 20-98% на обученных данных  
         - **❌ Защита:** Посторонние изображения отклоняются
         - **🦠 Авто-анализ:** Определение количества палочек
         
