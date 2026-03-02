@@ -353,9 +353,10 @@ def classify_with_reference(image_array, reference_samples):
         }
 
 def display_reference_samples_only(reference_samples, matched_sample=None):
-    """Отображает эталонные образцы только при загрузке (без заголовка)"""
+    """Отображает эталонные образцы только при загрузке"""
     if matched_sample:
-        # НЕ показываем заголовок "Найдено совпадение"
+        st.markdown('<div class="section-header fade-in">📚 Эталонные Образцы Бактерий</div>', unsafe_allow_html=True)
+        st.markdown(f"### 🎯 Найдено совпадение: {matched_sample['taxonomy']['genus']} {matched_sample['taxonomy']['species']}")
         
         # Показываем только совпавший образец
         image_path = f"exclusive_database/images/{matched_sample['filename']}"
@@ -367,22 +368,23 @@ def display_reference_samples_only(reference_samples, matched_sample=None):
                 st.write(f"🦠 Эталон: {matched_sample['taxonomy']['genus']} {matched_sample['taxonomy']['species']}")
         
         # Показываем другие похожие образцы
-        with st.expander("📋 Другие эталоны в базе"):
-            # Группируем по семействам
-            families = {}
-            for sample in reference_samples:
-                if sample['id'] != matched_sample['id']:  # Исключаем уже показанный
-                    family = sample["taxonomy"]["family"]
-                    if family not in families:
-                        families[family] = []
-                    families[family].append(sample)
-            
-            for family, samples in families.items():
-                with st.expander(f"🏛️ {family} ({len(samples)} образцов)"):
-                    cols = st.columns(min(len(samples), 4))
-                    for i, sample in enumerate(samples):
-                        with cols[i % 4]:
-                            st.write(f"🦠 {sample['taxonomy']['genus']} {sample['taxonomy']['species']}")
+        st.markdown("### 📋 Другие эталоны в базе:")
+        
+        # Группируем по семействам
+        families = {}
+        for sample in reference_samples:
+            if sample['id'] != matched_sample['id']:  # Исключаем уже показанный
+                family = sample["taxonomy"]["family"]
+                if family not in families:
+                    families[family] = []
+                families[family].append(sample)
+        
+        for family, samples in families.items():
+            with st.expander(f"🏛️ {family} ({len(samples)} образцов)"):
+                cols = st.columns(min(len(samples), 4))
+                for i, sample in enumerate(samples):
+                    with cols[i % 4]:
+                        st.write(f"🦠 {sample['taxonomy']['genus']} {sample['taxonomy']['species']}")
 
 def display_classification_results(result, reference_samples):
     """Отображает результаты классификации"""
@@ -414,7 +416,7 @@ def display_classification_results(result, reference_samples):
     else:
         st.markdown(f"""
         <div class="success-box fade-in">
-            <h3 style="color: #4caf50; margin: 0 0 15px 0;">✅ Классификация выполнена</h3>
+            <h3 style="color: #4caf50; margin: 0 0 15px 0;">✅ Найдено совпадение!</h3>
             <p style="color: #666; margin: 0;">Схожесть с эталоном: {result['similarity_score']:.2f}</p>
         </div>
         """, unsafe_allow_html=True)
@@ -534,7 +536,7 @@ def main():
             
             display_classification_results(result, reference_samples)
             
-            # Показываем эталонные образцы только при загрузке (без заголовка)
+            # Показываем эталонные образцы только при загрузке
             if "error" not in result:
                 # Находим совпавший образец
                 matched_sample = None
