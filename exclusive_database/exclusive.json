@@ -435,5 +435,35 @@
     },
     "notes": "Эксклюзивный пример #19 - газовая гангрена (очень крупные палочки с терминальными спорами)",
     "exclusive": true
+  },
+  {
+    "id": 19,
+    "filename": "exclusive_20.jpg",
+    "hash": "e90df8781b8e43af7053f546ba0ac9d2",
+    "timestamp": "20260302_115939",
+    "taxonomy": {
+      "family": "Bacillaceae",
+      "genus": "Clostridium",
+      "species": "C. perfringens"
+    },
+    "bacilli_count": 45,
+    "features": {
+      "mean_intensity": 145.2,
+      "std_intensity": 42.8,
+      "height": 300,
+      "width": 400,
+      "aspect_ratio": 1.33,
+      "num_contours": 35,
+      "mean_circularity": 0.18
+    },
+    "notes": "Эксклюзивный пример #20 - Clostridium perfringens (газовая гангрена)",
+    "variants": [
+      "C. perfringens",
+      "C. novyi",
+      "C. septicum",
+      "C. histoliticum",
+      "C. sordellii"
+    ],
+    "exclusive": true
   }
 ]
