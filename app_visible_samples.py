@@ -352,39 +352,34 @@ def classify_with_reference(image_array, reference_samples):
             "bacilli_count": current_bacilli
         }
 
-def display_reference_samples_only(reference_samples, matched_sample=None):
-    """Отображает эталонные образцы только при загрузке"""
-    if matched_sample:
-        st.markdown('<div class="section-header fade-in">📚 Эталонные Образцы Бактерий</div>', unsafe_allow_html=True)
-        st.markdown(f"### 🎯 Найдено совпадение: {matched_sample['taxonomy']['genus']} {matched_sample['taxonomy']['species']}")
+def display_reference_samples(reference_samples):
+    """Отображает эталонные образцы"""
+    st.markdown('<div class="section-header fade-in">📚 Эталонные Образцы Бактерий</div>', unsafe_allow_html=True)
+    
+    # Группируем по семействам
+    families = {}
+    for sample in reference_samples:
+        family = sample["taxonomy"]["family"]
+        if family not in families:
+            families[family] = []
+        families[family].append(sample)
+    
+    for family, samples in families.items():
+        st.markdown(f"### 🏛️ {family}")
         
-        # Показываем только совпавший образец
-        image_path = f"exclusive_database/images/{matched_sample['filename']}"
-        if os.path.exists(image_path):
-            try:
-                image = Image.open(image_path)
-                st.image(image, caption=f"Эталон: {matched_sample['taxonomy']['genus']} {matched_sample['taxonomy']['species']}", use_column_width=True)
-            except:
-                st.write(f"🦠 Эталон: {matched_sample['taxonomy']['genus']} {matched_sample['taxonomy']['species']}")
-        
-        # Показываем другие похожие образцы
-        st.markdown("### 📋 Другие эталоны в базе:")
-        
-        # Группируем по семействам
-        families = {}
-        for sample in reference_samples:
-            if sample['id'] != matched_sample['id']:  # Исключаем уже показанный
-                family = sample["taxonomy"]["family"]
-                if family not in families:
-                    families[family] = []
-                families[family].append(sample)
-        
-        for family, samples in families.items():
-            with st.expander(f"🏛️ {family} ({len(samples)} образцов)"):
-                cols = st.columns(min(len(samples), 4))
-                for i, sample in enumerate(samples):
-                    with cols[i % 4]:
+        cols = st.columns(min(len(samples), 4))
+        for i, sample in enumerate(samples):
+            with cols[i % 4]:
+                # Отображаем изображение если доступно
+                image_path = f"exclusive_database/images/{sample['filename']}"
+                if os.path.exists(image_path):
+                    try:
+                        image = Image.open(image_path)
+                        st.image(image, caption=f"{sample['taxonomy']['genus']} {sample['taxonomy']['species']}", use_column_width=True)
+                    except:
                         st.write(f"🦠 {sample['taxonomy']['genus']} {sample['taxonomy']['species']}")
+                else:
+                    st.write(f"🦠 {sample['taxonomy']['genus']} {sample['taxonomy']['species']}")
 
 def display_classification_results(result, reference_samples):
     """Отображает результаты классификации"""
@@ -395,24 +390,6 @@ def display_classification_results(result, reference_samples):
             <p style="color: #666; margin: 0;">Наилучшее совпадение: {result['best_score']:.2f}</p>
         </div>
         """, unsafe_allow_html=True)
-        
-        # Показываем все эталоны при ошибке
-        st.markdown('<div class="section-header fade-in">📚 Доступные Эталонные Образцы</div>', unsafe_allow_html=True)
-        
-        # Группируем по семействам
-        families = {}
-        for sample in reference_samples:
-            family = sample["taxonomy"]["family"]
-            if family not in families:
-                families[family] = []
-            families[family].append(sample)
-        
-        for family, samples in families.items():
-            with st.expander(f"🏛️ {family} ({len(samples)} образцов)"):
-                cols = st.columns(min(len(samples), 4))
-                for i, sample in enumerate(samples):
-                    with cols[i % 4]:
-                        st.write(f"🦠 {sample['taxonomy']['genus']} {sample['taxonomy']['species']}")
     else:
         st.markdown(f"""
         <div class="success-box fade-in">
@@ -482,7 +459,12 @@ def main():
     # Загружаем эталонные образцы
     reference_samples = load_reference_samples()
     
-    # НЕ показываем эталоны на главном экране
+    # Показываем эталоны
+    if reference_samples:
+        display_reference_samples(reference_samples)
+    else:
+        st.error("❌ Эталонные образцы не найдены!")
+        return
     
     # Загрузка изображения
     st.markdown("---")
@@ -536,20 +518,6 @@ def main():
             
             display_classification_results(result, reference_samples)
             
-            # Показываем эталонные образцы только при загрузке
-            if "error" not in result:
-                # Находим совпавший образец
-                matched_sample = None
-                for sample in reference_samples:
-                    if sample['id'] == result['match_id']:
-                        matched_sample = sample
-                        break
-                
-                if matched_sample:
-                    display_reference_samples_only(reference_samples, matched_sample)
-            else:
-                display_reference_samples_only(reference_samples, None)
-            
             # Показываем подробное сравнение
             if show_comparison and "error" not in result:
                 st.markdown("---")
@@ -584,7 +552,6 @@ def main():
         st.markdown("### 👆 Загрузите изображение для классификации")
         st.markdown("Поддерживаемые форматы: JPG, JPEG, PNG, BMP")
         st.markdown("Рекомендуемый размер: 224x224 пикселей или больше")
-        st.markdown("📚 В базе данных: 20 эталонных образцов бактерий")
         st.markdown('</div>', unsafe_allow_html=True)
         
         with st.expander("📖 Как использовать систему"):
