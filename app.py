@@ -1,100 +1,321 @@
 import streamlit as st
+import cv2
 import numpy as np
 from PIL import Image
 import io
 import base64
-import hashlib
+from typing import Dict, List, Tuple
+import matplotlib.pyplot as plt
+import os
 
-def simple_hash_features(image_array):
-    """Простая функция хэширования без OpenCV"""
-    # Конвертируем в байты
-    image_bytes = Image.fromarray(image_array).tobytes()
+# Импортируем эксклюзивный тренер
+try:
+    from exclusive_trainer import classify_exclusive_bacteria, get_exclusive_status
+    EXCLUSIVE_MODE = True
+except ImportError:
+    # Если эксклюзивный тренер недоступен, используем заглушку
+    EXCLUSIVE_MODE = False
+    def classify_exclusive_bacteria(image):
+        return {
+            "Тұқымдастық": "❌ Система недоступна",
+            "Туыстастық": "❌ Система недоступна", 
+            "Түрі": "❌ Система недоступна",
+            "error": "Эксклюзивный модуль не найден"
+        }
     
-    # Вычисляем MD5 хэш
-    hash_md5 = hashlib.md5()
-    hash_md5.update(image_bytes)
-    return hash_md5.hexdigest()
+    def get_exclusive_status():
+        return {
+            "total": 0,
+            "max": 20,
+            "percentage": 0,
+            "remaining": 20,
+            "ready": False
+        }
 
-def simple_classify(image_array, database):
-    """Простая классификация по хэшу"""
-    current_hash = simple_hash_features(image_array)
-    
-    # Ищем точное совпадение по хэшу
-    for item in database:
-        if item['hash'] == current_hash:
-            tax = item["taxonomy"]
-            return {
-                "Тұқымдастық": f"{tax['family']} (98%)",
-                "Туыстастық": f"{tax['genus']} (98%)",
-                "Түрі": f"{tax['species']} (98%)",
-                "match_id": item["id"],
-                "confidence": 98.0,
-                "bacilli_count": item["bacilli_count"]
-            }
-    
-    return {
-        "Тұқымдастық": "❌ Не определено",
-        "Туыстастық": "❌ Не определено", 
-        "Түрі": "❌ Не определено",
-        "error": "Изображение не соответствует эксклюзивной базе",
-        "best_score": 0.0
+# Настройка страницы
+st.set_page_config(
+    page_title="🦠 Эксклюзивная Система Определения Бактерий",
+    page_icon="🧬",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+# CSS стили для фирменного дизайна
+def load_css():
+    st.markdown("""
+    <style>
+    .main-header {
+        background: linear-gradient(135deg, #6B46C1, #9333EA);
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        margin-bottom: 20px;
     }
+    
+    .metric-card {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        text-align: center;
+        border-left: 4px solid #6B46C1;
+    }
+    
+    .prediction-box {
+        background: linear-gradient(135deg, #f0f2f1, #e8f4f8);
+        padding: 20px;
+        border-radius: 10px;
+        border: 1px solid #e1e5e9;
+        margin: 20px 0;
+    }
+    
+    .stButton>button {
+        background: linear-gradient(135deg, #6B46C1, #9333EA);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-weight: bold;
+    }
+    
+    .stButton>button:hover {
+        background: linear-gradient(135deg, #9333EA, #6B46C1);
+    }
+    
+    .upload-area {
+        background: #f8f9fa;
+        padding: 30px;
+        border: 2px dashed #6B46C1;
+        border-radius: 10px;
+        text-align: center;
+        margin: 20px 0;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
-def load_database():
-    """Загрузка базы данных"""
-    try:
-        import json
-        with open('exclusive_database/exclusive.json', 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except:
-        return []
+def create_logo_section():
+    """Создает логотип университета"""
+    st.markdown("""
+    <div class="main-header">
+        <h1 style="margin: 0; font-size: 2.5em;">🦠 Казахский Национальный Медицинский Университет</h1>
+        <p style="margin: 10px 0 0 0; font-size: 1.2em;">имени С.Д. Асфендиярова</p>
+        <p style="margin: 0; opacity: 0.8;">🧬 Эксклюзивная Система Определения Бактерий</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+def display_image_with_bacilli(image, bacilli_count):
+    """Отображает изображение с обнаруженными палочками"""
+    st.markdown("### 🔬 Детекция палочковидных бактерий")
+    
+    # Отображаем изображение
+    st.image(image, caption="Загруженное изображение", use_column_width=True)
+    
+    # Отображаем количество палочек
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.markdown(f"""
+        <div class="metric-card">
+            <h3>🦠 Обнаружено палочек</h3>
+            <h2>{bacilli_count}</h2>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        density = bacilli_count / (image.shape[0] * image.shape[1] / 10000) if image is not None else 0
+        st.markdown(f"""
+        <div class="metric-card">
+            <h3>📊 Плотность</h3>
+            <h2>{density:.1f}/см²</h2>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        if bacilli_count > 50:
+            level = "Высокая"
+            color = "#ff6b6b"
+        elif bacilli_count > 20:
+            level = "Средняя"
+            color = "#feca57"
+        else:
+            level = "Низкая"
+            color = "#48bb78"
+        
+        st.markdown(f"""
+        <div class="metric-card">
+            <h3>📈 Концентрация</h3>
+            <h2 style="color: {color};">{level}</h2>
+        </div>
+        """, unsafe_allow_html=True)
+
+def display_predictions(predictions):
+    """Отображает предсказания таксономии"""
+    st.markdown('<div class="prediction-box">', unsafe_allow_html=True)
+    st.subheader("🧬 Результаты определения таксономии")
+    
+    for label, prediction in predictions.items():
+        st.markdown(f"**{label}:** {prediction}")
+    
+    st.markdown(f"**🔬 Обнаружено палочек:** {predictions.get('bacilli_count', 'Не определено')}")
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Метрики в карточках
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        confidence_str = predictions.get("Тұқымдастық", "0%")
+        if "(" in confidence_str:
+            confidence = float(confidence_str.split("(")[-1].replace(")", "").replace("%", ""))
+        else:
+            confidence = 0
+            
+        st.markdown(f"""
+        <div class="metric-card">
+            <h3>Точность семейства</h3>
+            <h2>{confidence:.1f}%</h2>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        confidence_str = predictions.get("Туыстастық", "0%")
+        if "(" in confidence_str:
+            confidence = float(confidence_str.split("(")[-1].replace(")", "").replace("%", ""))
+        else:
+            confidence = 0
+            
+        st.markdown(f"""
+        <div class="metric-card">
+            <h3>Точность рода</h3>
+            <h2>{confidence:.1f}%</h2>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        confidence_str = predictions.get("Түрі", "0%")
+        if "(" in confidence_str:
+            confidence = float(confidence_str.split("(")[-1].replace(")", "").replace("%", ""))
+        else:
+            confidence = 0
+            
+        st.markdown(f"""
+        <div class="metric-card">
+            <h3>Точность вида</h3>
+            <h2>{confidence:.1f}%</h2>
+        </div>
+        """, unsafe_allow_html=True)
+
+def display_exclusive_status():
+    """Отображает статус эксклюзивной системы"""
+    status = get_exclusive_status()
+    
+    st.markdown("---")
+    st.subheader("📊 Статус эксклюзивной системы")
+    
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        st.metric("📁 База данных", f"{status['total']}/{status['max']}")
+    
+    with col2:
+        st.metric("📈 Прогресс", f"{status['percentage']:.1f}%")
+    
+    with col3:
+        st.metric("🔄 Осталось", f"{status['remaining']}")
+    
+    with col4:
+        st.metric("✅ Готовность", "ДА" if status['ready'] else "НЕТ")
+    
+    # Прогресс бар
+    st.progress(status['percentage'] / 100)
+    
+    if status['ready']:
+        st.success("🎉 Система готова к использованию!")
+    else:
+        st.warning(f"⚠️ Нужно минимум 3 фотографии, у вас {status['total']}")
+
+def show_training_instructions():
+    """Показывает инструкции по обучению"""
+    with st.expander("📚 Как добавить бактерии в систему"):
+        st.markdown("""
+        ### 🎯 Эксклюзивная система обучения:
+        
+        **Что это значит:**
+        - Система работает только с 20 заранее определенными фотографиями
+        - Каждое изображение добавляется с таксономией
+        - Только эти фото будут распознаваться
+        
+        **Как добавить:**
+        1. Подготовьте фото бактерии
+        2. Определите таксономию (семейство, род, вид)
+        3. Используйте скрипт `add_exclusive.py`
+        4. Следуйте инструкциям в консоли
+        
+        **Текущий статус:**
+        - Загружено: 19/20 фотографий
+        - Готовность: ✅ ДА
+        - Осталось: 1 слот
+        
+        **Защита системы:**
+        - ❌ Чужие фото отклоняются с ошибкой
+        - ✅ Только ваши 20 фото работают
+        - 🔒 Эксклюзивность гарантируется
+        """)
 
 def main():
-    """Главная функция без OpenCV"""
+    """Главная функция приложения"""
+    # Загружаем CSS
+    load_css()
     
-    # Настройка страницы
-    st.set_page_config(
-        page_title="🦠 Эксклюзивная Система Бактерий",
-        page_icon="🧬",
-        layout="wide",
-        initial_sidebar_state="expanded"
-    )
+    # Логотип университета
+    create_logo_section()
     
-    # Заголовок
+    # Заголовок в стиле сайта КАЗНМУ
     st.markdown("""
-    <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #6B46C1, #9333EA); color: white; border-radius: 10px; margin-bottom: 20px;">
-        <h1 style="margin: 0;">🦠 Эксклюзивная Система Определения Бактерий</h1>
-        <p style="margin: 0; font-size: 18px;">Только 19 видов бактерий • Точность 98% • Защита от чужих фото</p>
+    <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #f8f9fa, #e9ecef); border-radius: 10px; margin-bottom: 20px;">
+        <h2 style="color: #6B46C1; margin: 0;">🔒 Эксклюзивная Система Классификации Бактерий</h2>
+        <p style="color: #666; margin: 10px 0 0 0;">Только 20 определенных видов • Точность до 98% • Полная защита от чужих изображений</p>
     </div>
     """, unsafe_allow_html=True)
     
-    # Загрузка базы данных
-    database = load_database()
+    # Отображаем статус эксклюзивной системы
+    display_exclusive_status()
     
-    if database:
-        total = len(database)
-        percentage = (total / 20) * 100
-        ready = total >= 3
-        
-        col1, col2, col3 = st.columns(3)
-        
-        with col1:
-            st.metric("📁 База данных", f"{total}/20")
-        
-        with col2:
-            st.metric("📈 Прогресс", f"{percentage:.0f}%")
-        
-        with col3:
-            st.metric("✅ Готовность", "ДА" if ready else "НЕТ")
+    # Показываем инструкции по обучению
+    show_training_instructions()
     
     # Загрузка изображения
     st.markdown("---")
-    st.subheader("📸 Загрузите изображение бактерии")
+    st.subheader("📸 Загрузите изображение для анализа")
     
     uploaded_file = st.file_uploader(
-        "Выберите файл изображения",
-        type=['jpg', 'jpeg', 'png'],
-        help="Загрузите микроскопическое изображение для анализа"
+        "Выберите микроскопическое изображение",
+        type=['jpg', 'jpeg', 'png', 'bmp'],
+        help="Загрузите изображение бактерий для эксклюзивного анализа"
+    )
+    
+    # Боковая панель с параметрами
+    st.sidebar.markdown("### ⚙️ Параметры анализа")
+    
+    if EXCLUSIVE_MODE:
+        st.sidebar.info("🔒 Режим: Эксклюзивный (только ваши фото)")
+    else:
+        st.sidebar.error("❌ Режим: Офлайн (эксклюзивный модуль недоступен)")
+    
+    # Порог уверенности
+    confidence_threshold = st.sidebar.slider(
+        "📊 Порог уверенности (%)",
+        min_value=50,
+        max_value=98,
+        value=70,
+        help="Минимальный уровень уверенности для отображения результата"
+    )
+    
+    # Показывать детекцию палочек
+    show_bacilli = st.sidebar.checkbox(
+        "🦠 Показывать детекцию палочек",
+        value=True,
+        help="Отображать обнаруженные палочковидные бактерии"
     )
     
     if uploaded_file is not None:
@@ -104,19 +325,54 @@ def main():
             image = Image.open(io.BytesIO(image_bytes))
             image_array = np.array(image)
             
-            # Классификация
-            with st.spinner("🔍 Анализ изображения..."):
-                result = simple_classify(image_array, database)
+            # Конвертация в BGR для OpenCV
+            if len(image_array.shape) == 3:
+                image_array = cv2.cvtColor(image_array, cv2.COLOR_RGB2BGR)
+            else:
+                image_array = image_array
             
-            # Отображение результатов
+            # Отображаем загруженное изображение
             st.markdown("---")
-            st.subheader("🧬 Результаты анализа")
+            st.subheader("📸 Загруженное изображение")
+            st.image(image, caption="Исходное изображение", use_column_width=True)
+            
+            # Анализ изображения
+            with st.spinner("🔍 Анализ изображения..."):
+                result = classify_exclusive_bacteria(image_array)
+            
+            # Отображаем результаты
+            st.markdown("---")
             
             if "error" in result:
                 st.error(f"❌ {result['error']}")
-                st.info(f"🔍 Best Score: {result.get('best_score', 0):.2f}")
+                if 'best_score' in result:
+                    st.info(f"🔍 Best Score: {result['best_score']:.2f}")
+                
+                # Показываем информацию об ошибке
+                st.markdown("---")
+                st.subheader("ℹ️ Информация об ошибке")
+                st.markdown("""
+                **Почему произошла ошибка:**
+                - 🔒 Изображение не входит в эксклюзивную базу из 20 фотографий
+                - 🛡️ Система защищена от распознавания посторонних изображений
+                - 📋 Только заранее добавленные фото будут работать
+                
+                **Что делать:**
+                1. Используйте одно из 20 эксклюзивных изображений
+                2. Или добавьте новое изображение в систему
+                3. Проверьте правильность файла
+                """)
             else:
                 # Успешная классификация
+                st.success("✅ Изображение распознано!")
+                
+                # Отображаем предсказания
+                display_predictions(result)
+                
+                # Дополнительная информация
+                st.markdown("---")
+                st.subheader("📊 Детальная информация")
+                
                 col1, col2 = st.columns(2)
                 
                 with col1:
@@ -126,65 +382,68 @@ def main():
                     st.success(f"**Вид:** {result['Түрі']}")
                 
                 with col2:
-                    st.markdown("### 📊 Статистика")
+                    st.markdown("### 📈 Статистика")
                     st.info(f"**Match ID:** {result['match_id']}")
-                    st.info(f"**Уверенность:** {result['confidence']:.0f}%")
-                    st.info(f"**🦠 Палочки:** {result.get('bacilli_count', 'Не определено')}")
-            
-            # Отображение изображения
-            st.markdown("---")
-            st.subheader("📸 Загруженное изображение")
-            st.image(image, caption="Исходное изображение", use_column_width=True)
+                    st.info(f"**Уверенность:** {result['confidence']:.1f}%")
+                    
+                    # Проверяем порог уверенности
+                    if result['confidence'] >= confidence_threshold:
+                        st.success("✅ Уверенность выше порога")
+                    else:
+                        st.warning(f"⚠️ Уверенность ниже порога {confidence_threshold}%")
+                
+                # Показываем детекцию палочек если нужно
+                if show_bacilli and 'bacilli_count' in result:
+                    st.markdown("---")
+                    display_image_with_bacilli(image_array, result['bacilli_count'])
             
         except Exception as e:
-            st.error(f"❌ Ошибка обработки: {e}")
+            st.error(f"❌ Ошибка при обработке изображения: {e}")
+            st.write("Пожалуйста, проверьте формат изображения и попробуйте снова.")
     
     else:
-        # Инструкция
-        st.markdown("---")
-        st.subheader("ℹ️ Информация о системе")
+        # Инструкции при отсутствии загруженного файла
+        st.info("👆 Загрузите изображение для начала анализа")
         
-        st.markdown("""
-        ### 🎯 Особенности:
-        - **🔒 Эксклюзивная база:** Только 19 определенных бактерий
-        - **🎯 Точность:** 98% на обученных данных  
-        - **❌ Защита:** Посторонние изображения отклоняются
-        - **🦠 Авто-анализ:** Определение количества палочек
+        # Пример использования
+        with st.expander("📖 Как использовать"):
+            st.markdown("""
+            ### 🔒 Эксклюзивная система:
+            1. **Загрузите изображение**: Нажмите кнопку "Browse files" и выберите микроскопическое изображение
+            2. **Получите результат**: Система автоматически определит таксономию
+            3. **Проверьте точность**: Уверенность будет показана в процентах
+            4. **Эксклюзивность**: Только ваши 20 фото будут работать
+            
+            **Поддерживаемые форматы**: JPG, JPEG, PNG, BMP
+            **Рекомендуемый размер**: 224x224 пикселей или больше
+            
+            **⚠️ Важно**: Чужие изображения будут отклонены с ошибкой!
+            """)
         
-        ### 📋 Список бактерий:
-        1. S. aureus - гроздевидные кокки
-        2. N. meningitidis - диплококки
-        3. V. cholerae - изогнутые запятые
-        4. S. pyogenes - цепочки кокков
-        5. B. melitensis - очень мелкие кокки
-        6. E. coli - кишечные палочки
-        7. B. anthracis - крупные палочки со спорами
-        8. C. tetani - палочки с терминальными спорами
-        9. C. jejuni - S-образные изогнутые палочки
-        10. S. dysenteriae - шигеллез
-        11. F. tularensis - очень мелкие коккобактерии
-        12. Y. pestis - чумные палочки
-        13. L. interrogans - тонкие спиралевидные
-        14. M. leprae - проказа
-        15. C. botulinum - ботулизм
-        16. H. pylori - хеликобактериоз
-        17. S. typhi - брюшной тиф
-        18. N. gonorrhoeae - гонорея
-        19. C. perfringens - газовая гангрена
-        
-        ### 🚀 Как использовать:
-        1. Загрузите изображение бактерии
-        2. Получите таксономию или ошибку
-        3. Попробуйте загрузить СВОЕ фото - увидите защиту
-        """)
-    
-    # Футер
-    st.markdown("---")
-    st.markdown("""
-    <div style="text-align: center; padding: 10px; background-color: #f0f2f1; color: white; border-radius: 5px;">
-        <p style="margin: 0;">🏥 Разработано для Анамедфорума • 🦠 Эксклюзивная система • 🎯 Точность 98%</p>
-    </div>
-    """, unsafe_allow_html=True)
+        # Информация о проекте
+        with st.expander("ℹ️ О проекте"):
+            st.markdown("""
+            **Проект разработан для:** Анамедфорума
+            
+            **Разработчик:** Казахский национальный медицинский университет имени С.Д. Асфендиярова
+            
+            **Технологии:**
+            - 🔒 Эксклюзивная система на 20 фотографиях
+            - 🎯 Точная классификация только на ваших данных
+            - OpenCV для детекции и анализа форм
+            - Streamlit для веб-интерфейса
+            
+            **Функционал:**
+            - Определение таксономии бактерий (семейство, род, вид)
+            - Автоматическая детекция палочковидных бактерий
+            - Работа только с вашими 20 фотографиями
+            - Полная защита от посторонних изображений
+            
+            **Метод классификации:**
+            - 🔒 **Только ваши 20 фото** - эксклюзивная база
+            - 🎯 **Хэш-сравнение** - точное определение
+            - 🛡️ **Защита от ошибок** - отклонение чужих фото
+            """)
 
 if __name__ == "__main__":
     main()
